@@ -10,6 +10,7 @@ const authRouter = express.Router();
 authRouter.post("/register", validateSignup, register);
 authRouter.post("/login", validateLogin, login);
 authRouter.get("/user", protect, getUser);
+authRouter.post("/guest", guest);
 
 
 

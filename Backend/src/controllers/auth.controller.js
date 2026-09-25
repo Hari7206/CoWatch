@@ -1,4 +1,5 @@
 import User from '../model/user.model.js'
+import crypto from 'crypto';   
 import { hashPassword, verifyPassword } from "../utils/password.js"
 import { signToken } from "../utils/jwt.js";
 
@@ -89,3 +90,28 @@ export async function getUser(req, res) {
 }
 
 
+export async function guest(req, res) {
+    try {
+        const { username } = req.body;
+
+    
+        const finalUsername = (username && typeof username === 'string' && username.trim())
+            ? username.trim().slice(0, 20)
+            : `Guest_${Math.random().toString(36).slice(2, 8)}`;
+
+        const guestId = `guest_${crypto.randomUUID()}`;
+
+        const token = signToken(guestId);
+
+        return res.status(200).json({
+            token,
+            user: {
+                id: guestId,
+                username: finalUsername,
+            },
+        });
+    } catch (error) {
+        console.error('Error creating guest:', error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}
