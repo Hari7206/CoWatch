@@ -10,6 +10,7 @@ export default function Signup() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [focused, setFocused] = useState(false);
 
     async function onSubmit(e) {
         e.preventDefault();
@@ -31,75 +32,113 @@ export default function Signup() {
     }
 
     return (
-        <div className="min-h-screen bg-bg text-text flex flex-col">
-            <header className="px-6 py-4">
-                <Link to="/" className="font-display font-bold text-xl tracking-tight">
-                    CoWatch
+        <div
+            className={`min-h-screen flex items-center justify-center px-6 transition-colors duration-700 ${
+                focused ? 'bg-white text-black' : 'bg-black text-white'
+            }`}
+        >
+            <main className="w-full max-w-xl">
+                <Link
+                    to="/"
+                    className="block font-display font-bold text-3xl tracking-tight mb-12 text-center"
+                >
+                    Co<span className="text-brand">Watch</span>
                 </Link>
-            </header>
 
-            <main className="flex-1 flex items-center justify-center px-6">
-                <div className="w-full max-w-sm">
-                    <h1 className="font-display font-bold text-3xl mb-2">
-                        Create your account
-                    </h1>
-                    <p className="text-text-muted mb-8">
-                        Sign up to save your rooms and history.
-                    </p>
+                <h1 className="font-display font-bold text-5xl md:text-6xl mb-3 text-center">
+                    Create your account
+                </h1>
+                <p
+                    className={`text-lg mb-12 text-center transition-colors duration-700 ${
+                        focused ? 'text-black/60' : 'text-white/70'
+                    }`}
+                >
+                    Sign up to save your rooms and history.
+                </p>
 
-                    <form onSubmit={onSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Username
-                            </label>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                placeholder="yourname"
-                                autoComplete="username"
-                                required
-                                className="w-full px-4 py-3 rounded-xl bg-surface border border-border focus:outline-none focus:border-brand transition-colors"
-                            />
-                        </div>
+                <form onSubmit={onSubmit} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-3">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            onFocus={() => setFocused(true)}
+                            onBlur={() => setFocused(false)}
+                            placeholder="yourname"
+                            autoComplete="username"
+                            required
+                            className={`w-full px-6 py-4 text-lg rounded-2xl border-2 transition-colors duration-500 focus:outline-none ${
+                                focused
+                                    ? 'bg-white text-black border-black/15 placeholder:text-black/30 focus:border-black'
+                                    : 'bg-transparent text-white border-white/25 placeholder:text-white/40 focus:border-white'
+                            }`}
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                autoComplete="new-password"
-                                required
-                                className="w-full px-4 py-3 rounded-xl bg-surface border border-border focus:outline-none focus:border-brand transition-colors"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-3">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            onFocus={() => setFocused(true)}
+                            onBlur={() => setFocused(false)}
+                            placeholder="••••••••"
+                            autoComplete="new-password"
+                            required
+                            className={`w-full px-6 py-4 text-lg rounded-2xl border-2 transition-colors duration-500 focus:outline-none ${
+                                focused
+                                    ? 'bg-white text-black border-black/15 placeholder:text-black/30 focus:border-black'
+                                    : 'bg-transparent text-white border-white/25 placeholder:text-white/40 focus:border-white'
+                            }`}
+                        />
+                    </div>
 
-                        {error && (
-                            <div className="px-4 py-3 rounded-xl bg-brand-soft text-brand text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-3 rounded-xl bg-brand text-white hover:bg-brand-hover transition-colors font-medium disabled:opacity-60"
+                    {error && (
+                        <div
+                            className={`px-6 py-4 rounded-2xl text-base transition-colors duration-500 ${
+                                focused
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-red-900/40 text-white'
+                            }`}
                         >
-                            {loading ? 'Creating account…' : 'Create account'}
-                        </button>
-                    </form>
+                            {error}
+                        </div>
+                    )}
 
-                    <p className="text-sm text-text-muted text-center mt-6">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-brand hover:underline font-medium">
-                            Log in
-                        </Link>
-                    </p>
-                </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`w-full py-4 text-lg rounded-2xl font-semibold transition-colors duration-500 disabled:opacity-60 ${
+                            focused
+                                ? 'bg-black text-white hover:bg-black/85'
+                                : 'bg-white text-black hover:bg-white/90'
+                        }`}
+                    >
+                        {loading ? 'Creating account…' : 'Create account'}
+                    </button>
+                </form>
+
+                <p
+                    className={`text-base text-center mt-8 transition-colors duration-700 ${
+                        focused ? 'text-black/60' : 'text-white/70'
+                    }`}
+                >
+                    Already have an account?{' '}
+                    <Link
+                        to="/login"
+                        className={`font-medium underline-offset-4 hover:underline ${
+                            focused ? 'text-black' : 'text-white'
+                        }`}
+                    >
+                        Log in
+                    </Link>
+                </p>
             </main>
         </div>
     );

@@ -3,20 +3,20 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = '7d';
-
+const GUEST_EXPIRES_IN = '3h';
 
 if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not set in .env');
 }
+
 export const signToken = (userId) => {
-    return jwt.sign(
-        { userId },
-        JWT_SECRET,
-        { expiresIn: JWT_EXPIRES_IN }
-    );
+    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
+
+export const signGuestToken = (userId) => {
+    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: GUEST_EXPIRES_IN });
 };
 
 export const verifyToken = (token) => {
     return jwt.verify(token, JWT_SECRET);
 };
-

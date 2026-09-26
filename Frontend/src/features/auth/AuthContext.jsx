@@ -5,6 +5,7 @@ import {
     clearSession,
     getToken,
     getUser,
+    isTokenExpired,
 } from '../../shared/lib/identity';
 
 export const AuthContext = createContext(null);
@@ -13,19 +14,20 @@ export function AuthContextProvider({ children }) {
     const [user, setUser] = useState(getUser());
     const [loading, setLoading] = useState(true);
 
- useEffect(() => {
+useEffect(() => {
     async function verify() {
         const token = getToken();
         const cachedUser = getUser();
 
-        if (!token) {
+        if (!token || isTokenExpired()) {
+            clearSession();
+            setUser(null);
             setLoading(false);
             return;
         }
 
-        // Skip server verification for guest sessions.
-        // Their identity lives in localStorage — no server round-trip needed.
         if (cachedUser?.id?.startsWith('guest_')) {
+            setUser(cachedUser);
             setLoading(false);
             return;
         }

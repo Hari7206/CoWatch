@@ -1,7 +1,7 @@
 import User from '../model/user.model.js'
 import crypto from 'crypto';   
 import { hashPassword, verifyPassword } from "../utils/password.js"
-import { signToken } from "../utils/jwt.js";
+import { signToken  , signGuestToken} from "../utils/jwt.js";
 
 
 
@@ -114,7 +114,7 @@ export async function guest(req, res) {
 
         const guestId = `guest_${crypto.randomUUID()}`;
 
-        const token = signToken(guestId);
+        const token = signGuestToken(guestId);
 
         return res.status(200).json({
             token,

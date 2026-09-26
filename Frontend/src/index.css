@@ -3,10 +3,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    
-    --font-display: "Space Grotesk", system-ui, sans-serif;
+      --font-display: "Space Grotesk", system-ui, sans-serif;
     --font-sans: "Inter", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-logo: "Bricolage Grotesque", "Space Grotesk", system-ui, sans-serif;
 
     --color-brand: #DC2626;
     --color-brand-hover: #B91C1C;
@@ -41,6 +41,10 @@
     --color-border: var(--border);
 }
 
+
+*{
+    cursor: default;
+}
 body {
     font-family: var(--font-sans);
     background-color: var(--color-bg);
@@ -51,4 +55,9 @@ body {
 h1, h2, h3, h4 {
     font-family: var(--font-display);
     letter-spacing: -0.02em;
+}
+
+input,
+textarea {
+    caret-color: #DC2626;
 }
