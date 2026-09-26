@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-sans: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --color-brand: #DC2626;
+    --color-brand-hover: #B91C1C;
+    --color-brand-soft: #FEE2E2;
+}
+
+:root {
+    --bg: #FAF7F2;
+    --bg-soft: #F5EFE6;
+    --surface: #FFFFFF;
+    --text: #0A0A0A;
+    --text-muted: #6B6B6B;
+    --border: #E8E3DC;
+}
+
+/* Dark mode */
+.dark {
+    --bg: #0F0F0F;
+    --bg-soft: #1A1A1A;
+    --surface: #171717;
+    --text: #F5F5F5;
+    --text-muted: #A3A3A3;
+    --border: #262626;
+}
+
+@theme inline {
+    --color-bg: var(--bg);
+    --color-bg-soft: var(--bg-soft);
+    --color-surface: var(--surface);
+    --color-text: var(--text);
+    --color-text-muted: var(--text-muted);
+    --color-border: var(--border);
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    transition: background-color 0.2s, color 0.2s;
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+}

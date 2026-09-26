@@ -2,7 +2,7 @@ import express from 'express';
 import {register, login, getUser} from "../controllers/auth.controller.js";
 import { validateSignup , validateLogin } from "../validators/auth.validator.js"
 import { protect } from "../utils/middleware.js"
-
+import { guest } from "../controllers/auth.controller.js";
 const authRouter = express.Router();
 
 

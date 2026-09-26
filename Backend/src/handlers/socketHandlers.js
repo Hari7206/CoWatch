@@ -149,17 +149,17 @@ function handlePlayback(io, socket, action, payload) {
         const room = getRoomFor(socket);
         if (!room) return;
 
-        const state = room.applyAction(socket.userId, action, payload);
+        room.applyAction(socket.userId, action, payload);
 
+        const snap = room.snapshot();
         io.to(room.id).emit(SOCKET_EVENTS.SYNC_STATE, {
             roomId: room.id,
-            state,
+            state: snap.state,
         });
     } catch (err) {
         socket.emit(SOCKET_EVENTS.ERROR, err.message);
     }
 }
-
 function handleLeave(io, socket) {
     const roomId = socket.roomId;
     if (!roomId) return;

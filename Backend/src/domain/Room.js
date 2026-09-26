@@ -29,7 +29,7 @@ class Room {
 
     removeParticipant(id) {
         this.participants.delete(id);
-            if (id === this.hostId && this.participants.size > 0) {
+        if (id === this.hostId && this.participants.size > 0) {
             const nextId = this.participants.keys().next().value;
             this.transferHost(this.hostId, nextId);
         }
@@ -43,13 +43,15 @@ class Room {
         return this.participants.has(id);
     }
 
+
+
     applyAction(actorId, action, payload = {}) {
         const actor = this.participants.get(actorId);
 
         if (!actor) {
             throw new Error('You are not in this room');
         }
-        
+
         if (!actor.can(action)) {
             throw new Error('You do not have permission to do this');
         }
@@ -57,9 +59,15 @@ class Room {
         switch (action) {
             case 'play':
                 this.state.playing = true;
+                if (payload.time !== undefined) {
+                    this.state.currentTime = payload.time;
+                }
                 break;
             case 'pause':
                 this.state.playing = false;
+                if (payload.time !== undefined) {
+                    this.state.currentTime = payload.time;
+                }
                 break;
             case 'seek':
                 this.state.currentTime = payload.time;
@@ -124,12 +132,26 @@ class Room {
         return [...this.participants.values()].map((p) => p.toJSON());
     }
 
+    currentPlaybackTime() {
+    if (!this.state.playing) return this.state.currentTime;
+    const elapsed = (Date.now() - this.state.updatedAt) / 1000;
+    const result = this.state.currentTime + elapsed;
+    console.log('[Room.currentPlaybackTime]', {
+        base: this.state.currentTime,
+        elapsed: elapsed.toFixed(2),
+        result: result.toFixed(2),
+    });
+    return result;
+}
     snapshot() {
         return {
             roomId: this.id,
             hostId: this.hostId,
             participants: this.participantsList(),
-            state: this.state,
+            state: {
+                ...this.state,
+                currentTime: this.currentPlaybackTime(),
+            },
         };
     }
 }

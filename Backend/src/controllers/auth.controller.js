@@ -69,12 +69,25 @@ export async function login(req, res) {
     }}
 
 
+
 export async function getUser(req, res) {
-     try {
-        const user = await User.findById(req.userId);
+    try {
+        const userId = req.userId;
+
+        if (userId?.startsWith('guest_')) {
+            return res.status(200).json({
+                user: {
+                    id: userId,
+                    username: null,
+                },
+                guest: true,
+            });
+        }
+
+        const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: 'User not found' });
         }
 
         return res.status(200).json({
@@ -84,8 +97,8 @@ export async function getUser(req, res) {
             },
         });
     } catch (error) {
-        console.error("Error fetching user:", error.message);
-        return res.status(500).json({ message: "Internal server error" });
+        console.error('Error fetching user:', error.message);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }
 
