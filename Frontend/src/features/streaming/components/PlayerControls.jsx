@@ -32,6 +32,7 @@ export default function PlayerControls({ localTime }) {
     function handleSeekChange(e) {
         setScrubTime(Number(e.target.value));
     }
+
     function handleSeekEnd(e) {
         const time = Number(e.target.value);
         setScrubTime(null);
@@ -39,10 +40,10 @@ export default function PlayerControls({ localTime }) {
     }
 
     return (
-        <div className="rounded-2xl bg-surface border border-border p-4 flex items-center gap-4">
+        <div className="rounded-xl bg-[#181818] border border-white/5 p-3 flex items-center gap-4">
             <button
                 onClick={handleToggle}
-                className="w-12 h-12 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-11 h-11 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-hover transition-colors flex-shrink-0"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
             >
                 {isPlaying ? (
@@ -57,7 +58,7 @@ export default function PlayerControls({ localTime }) {
                 )}
             </button>
 
-            <span className="font-mono text-sm w-12 text-right tabular-nums">
+            <span className="font-mono text-sm w-12 text-right tabular-nums text-white/90">
                 {format(displayTime)}
             </span>
 
@@ -74,12 +75,12 @@ export default function PlayerControls({ localTime }) {
                 className="flex-1 accent-brand disabled:opacity-40"
             />
 
-            <span className="font-mono text-sm w-12 tabular-nums text-text-muted">
+            <span className="font-mono text-sm w-12 tabular-nums text-white/40">
                 {format(displayDuration)}
             </span>
 
             {!canControl && (
-                <span className="text-xs text-text-muted whitespace-nowrap">
+                <span className="text-xs text-white/40 whitespace-nowrap">
                     Request mode
                 </span>
             )}

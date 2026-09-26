@@ -9,33 +9,59 @@ export function Header() {
     const navigate = useNavigate();
 
     return (
-        <header className="border-b border-border bg-bg">
-            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <Link to="/" className="font-display font-bold text-xl tracking-tight">
-                    CoWatch
-                </Link>
+        <header className="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur-md">
+            <div className="h-16 px-4 md:px-6 flex items-center justify-between gap-4 max-w-[1500px] mx-auto">
+                <div className="flex items-center gap-8">
+                    <Link
+                        to="/"
+                        className="font-logo font-bold text-xl tracking-tight"
+                    >
+                        Co<span className="text-brand">Watch</span>
+                    </Link>
 
-                <div className="flex items-center gap-3">
+                    <nav className="hidden lg:flex items-center gap-6">
+                        <a href="/#features" className="text-sm text-text-muted hover:text-text transition-colors">
+                            Features
+                        </a>
+                        <a href="/#how-it-works" className="text-sm text-text-muted hover:text-text transition-colors">
+                            How It Works
+                        </a>
+                        <a href="/#faq" className="text-sm text-text-muted hover:text-text transition-colors">
+                            FAQ
+                        </a>
+                    </nav>
+                </div>
+
+                <div className="flex items-center gap-2">
                     <ThemeToggle />
 
                     {user ? (
-                        <UserMenu user={user} onLogout={() => {
-                            handleLogout();
-                            navigate('/');
-                        }} />
+                        <UserMenu
+                            user={user}
+                            onLogout={() => {
+                                handleLogout();
+                                navigate('/');
+                            }}
+                        />
                     ) : (
                         <>
                             <Link
-                                to="/login"
-                                className="px-4 py-2 text-sm font-medium hover:bg-bg-soft rounded-full transition-colors"
+                                to="/guest"
+                                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-text-muted hover:text-text transition-colors"
                             >
-                                Login
+                                Guest
                             </Link>
                             <Link
-                                to="/signup"
-                                className="px-4 py-2 text-sm font-medium bg-brand text-white hover:bg-brand-hover rounded-full transition-colors"
+                                to="/login"
+                                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium hover:bg-bg-soft rounded-full transition-colors"
                             >
-                                Sign Up
+                                Log in
+                            </Link>
+                            <Link
+                                to="/start"
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-brand text-white rounded-full shadow-[0_0_24px_-4px_rgba(220,38,38,0.5)] hover:bg-brand-hover transition-all"
+                            >
+                                Start a Room
                             </Link>
                         </>
                     )}
@@ -67,7 +93,7 @@ function UserMenu({ user, onLogout }) {
             <button
                 onClick={() => setOpen((o) => !o)}
                 aria-label="Open user menu"
-                className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white transition-transform hover:scale-105"
+                className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-white text-sm transition-transform hover:scale-105"
                 style={{ backgroundColor: color }}
             >
                 {initial}
@@ -85,7 +111,7 @@ function UserMenu({ user, onLogout }) {
                         }}
                         className="w-full text-left px-4 py-2 text-sm hover:bg-bg-soft transition-colors"
                     >
-                        Logout
+                        Log out
                     </button>
                 </div>
             )}

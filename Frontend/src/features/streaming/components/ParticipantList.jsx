@@ -8,12 +8,17 @@ export default function ParticipantList() {
     const { user } = useAuth();
 
     return (
-        <div className="rounded-2xl bg-surface border border-border p-4">
+        <div className="rounded-xl bg-[#181818] border border-white/5 p-4">
             <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display font-semibold text-lg">
-                    Participants
-                </h2>
-                <span className="text-xs text-text-muted font-mono">
+                <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px] text-white/60">
+                        group
+                    </span>
+                    <h2 className="font-display font-semibold text-base">
+                        Participants
+                    </h2>
+                </div>
+                <span className="text-xs text-white/40 font-mono">
                     {participants.length}
                 </span>
             </div>
@@ -30,7 +35,7 @@ export default function ParticipantList() {
             </ul>
 
             {myRole && (
-                <div className="mt-4 pt-4 border-t border-border text-xs text-text-muted flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-white/5 text-xs text-white/40 flex items-center justify-between">
                     <span>Your role</span>
                     <span className="font-mono uppercase tracking-widest text-brand">
                         {myRole}
@@ -66,11 +71,17 @@ function ParticipantRow({ participant, isMe, canManage }) {
         };
     }
 
+    const roleColor = {
+        host: 'bg-brand text-white',
+        moderator: 'bg-blue-500/20 text-blue-400',
+        participant: 'bg-white/5 text-white/50',
+    }[participant.role];
+
     return (
         <li
             ref={ref}
-            className={`relative flex items-center gap-3 px-2 py-2 rounded-lg ${
-                isMe ? 'bg-bg-soft' : ''
+            className={`relative flex items-center gap-3 px-2 py-2 rounded-lg transition-colors ${
+                isMe ? 'bg-white/5' : 'hover:bg-white/5'
             }`}
         >
             <div
@@ -81,31 +92,28 @@ function ParticipantRow({ participant, isMe, canManage }) {
             </div>
 
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm font-medium truncate text-white/90">
                     {participant.username}
-                    {isMe && <span className="text-text-muted font-normal"> (you)</span>}
-                </p>
-                <p className="text-xs text-text-muted uppercase tracking-widest">
-                    {participant.role}
+                    {isMe && <span className="text-white/40 font-normal"> (you)</span>}
                 </p>
             </div>
+
+            <span className={`text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full ${roleColor}`}>
+                {participant.role}
+            </span>
 
             {canManage && (
                 <button
                     onClick={() => setOpen((o) => !o)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-bg-soft transition-colors text-text-muted"
+                    className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-white/40"
                     aria-label="Manage participant"
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="5" cy="12" r="1.5" />
-                        <circle cx="12" cy="12" r="1.5" />
-                        <circle cx="19" cy="12" r="1.5" />
-                    </svg>
+                    <span className="material-symbols-outlined text-[18px]">more_vert</span>
                 </button>
             )}
 
             {open && (
-                <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-surface border border-border shadow-lg py-1 z-20">
+                <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-[#1e1e1e] border border-white/10 shadow-xl py-1 z-20">
                     {participant.role === 'participant' && (
                         <MenuItem
                             onClick={() => {
@@ -131,7 +139,7 @@ function ParticipantRow({ participant, isMe, canManage }) {
                         Transfer host
                     </MenuItem>
 
-                    <div className="my-1 border-t border-border" />
+                    <div className="my-1 border-t border-white/10" />
 
                     <MenuItem onClick={act(removeParticipant)} variant="danger">
                         Remove from room
@@ -146,8 +154,8 @@ function MenuItem({ onClick, variant, children }) {
     return (
         <button
             onClick={onClick}
-            className={`w-full text-left px-3 py-2 text-sm hover:bg-bg-soft transition-colors ${
-                variant === 'danger' ? 'text-brand' : ''
+            className={`w-full text-left px-3 py-2 text-sm hover:bg-white/5 transition-colors ${
+                variant === 'danger' ? 'text-brand' : 'text-white/90'
             }`}
         >
             {children}
