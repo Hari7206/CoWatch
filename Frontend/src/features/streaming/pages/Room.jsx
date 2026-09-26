@@ -7,6 +7,7 @@ import YouTubePlayer from '../components/YouTubePlayer';
 import VideoPicker from '../components/VideoPicker';
 import PlayerControls from '../components/PlayerControls';
 import ParticipantList from '../components/ParticipantList';
+import ChatPanel from '../components/ChatPanel';
 
 export default function Room() {
     const { roomId } = useParams();
@@ -33,7 +34,6 @@ function RoomInner() {
         myRole,
         error,
         canControl,
-        changeVideo,
         playerRef,
     } = useRoom();
 
@@ -97,13 +97,11 @@ function RoomInner() {
                             localTime={localTime}
                         />
 
-                        <VideoPicker
-                            onSelect={changeVideo}
-                            disabled={!canControl}
-                        />
+                        <VideoPicker  />
                     </div>
 
                     <aside className="space-y-4">
+                        <ChatPanel />
                         <ParticipantList />
                     </aside>
                 </div>

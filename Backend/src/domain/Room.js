@@ -1,6 +1,6 @@
-// Backend/src/domain/Room.js
 
 import Participant from './Participant.js';
+import ChatLog from './ChatLog.js';
 import { ROLES } from '../constants.js';
 
 class Room {
@@ -8,6 +8,7 @@ class Room {
         this.id = id;
         this.hostId = hostId;
         this.participants = new Map();
+        this.chat = new ChatLog();
         this.state = {
             videoId: null,
             playing: false,
@@ -15,7 +16,6 @@ class Room {
             updatedAt: Date.now(),
         };
     }
-
     addParticipant({ id, username, socketId, role }) {
         const participant = new Participant({
             id,
@@ -132,22 +132,56 @@ class Room {
         return [...this.participants.values()].map((p) => p.toJSON());
     }
 
-    currentPlaybackTime() {
+    sendMessage(actorId, text) {
+        const actor = this.participants.get(actorId);
+        if (!actor) throw new Error('You are not in this room');
+        return this.chat.addMessage({
+            userId: actorId,
+            username: actor.username,
+            text,
+        });
+    }
+
+    requestAction(actorId, action, payload) {
+        const actor = this.participants.get(actorId);
+        if (!actor) throw new Error('You are not in this room');
+        if (actor.role !== ROLES.PARTICIPANT) {
+            throw new Error('Only participants need to request approval');
+        }
+        return this.chat.addRequest({
+            userId: actorId,
+            username: actor.username,
+            action,
+            payload,
+        });
+    }
+
+    resolveRequest(actorId, requestId, decision) {
+        const actor = this.participants.get(actorId);
+        if (!actor) throw new Error('You are not in this room');
+        if (actor.role !== ROLES.HOST && actor.role !== ROLES.MODERATOR) {
+            throw new Error('Only host or moderator can resolve requests');
+        }
+
+        const request = this.chat.getRequest(requestId);
+        if (!request) throw new Error('Request not found');
+
+        return this.chat.resolveRequest(requestId, decision);
+    }
+
+   currentPlaybackTime() {
     if (!this.state.playing) return this.state.currentTime;
     const elapsed = (Date.now() - this.state.updatedAt) / 1000;
-    const result = this.state.currentTime + elapsed;
-    console.log('[Room.currentPlaybackTime]', {
-        base: this.state.currentTime,
-        elapsed: elapsed.toFixed(2),
-        result: result.toFixed(2),
-    });
-    return result;
+    return this.state.currentTime + elapsed;
 }
+
+
     snapshot() {
         return {
             roomId: this.id,
             hostId: this.hostId,
             participants: this.participantsList(),
+            chat: this.chat.list(),
             state: {
                 ...this.state,
                 currentTime: this.currentPlaybackTime(),

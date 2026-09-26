@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useRoom } from '../hooks/useRoom';
 import YouTubeUrlInput from './YouTubeUrlInput';
 import YouTubeSearch from './YouTubeSearch';
 
-export default function VideoPicker({ onSelect, disabled }) {
+export default function VideoPicker() {
+    const { requestChangeVideo, canControl } = useRoom();
     const [tab, setTab] = useState('search');
 
     return (
@@ -15,17 +17,17 @@ export default function VideoPicker({ onSelect, disabled }) {
                     YouTube URL
                 </TabButton>
 
-                {disabled && (
+                {!canControl && (
                     <span className="ml-auto text-xs text-text-muted self-center">
-                        Only the host can change videos
+                        Request mode
                     </span>
                 )}
             </div>
 
             {tab === 'search' ? (
-                <YouTubeSearch onSelect={onSelect} disabled={disabled} />
+                <YouTubeSearch onSelect={requestChangeVideo} disabled={false} />
             ) : (
-                <YouTubeUrlInput onSelect={onSelect} disabled={disabled} />
+                <YouTubeUrlInput onSelect={requestChangeVideo} disabled={false} />
             )}
         </div>
     );

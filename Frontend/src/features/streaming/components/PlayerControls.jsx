@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { useRoom } from '../hooks/useRoom';
 
 export default function PlayerControls({ localTime }) {
-    const { playback, canControl, play, pause, seek, playerRef } = useRoom();
+    const {
+        playback,
+        canControl,
+        playerRef,
+        requestPlay,
+        requestPause,
+        requestSeek,
+    } = useRoom();
     const [scrubTime, setScrubTime] = useState(null);
 
     const isPlaying = playback?.playing;
@@ -18,27 +25,23 @@ export default function PlayerControls({ localTime }) {
     }
 
     function handleToggle() {
-        if (!canControl) return;
-        if (isPlaying) pause();
-        else play();
+        if (isPlaying) requestPause();
+        else requestPlay();
     }
 
     function handleSeekChange(e) {
         setScrubTime(Number(e.target.value));
     }
-
     function handleSeekEnd(e) {
-        if (!canControl) return;
         const time = Number(e.target.value);
         setScrubTime(null);
-        seek(time);
+        requestSeek(time);
     }
 
     return (
         <div className="rounded-2xl bg-surface border border-border p-4 flex items-center gap-4">
             <button
                 onClick={handleToggle}
-                disabled={!canControl}
                 className="w-12 h-12 rounded-full bg-brand text-white flex items-center justify-center hover:bg-brand-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
             >
@@ -67,7 +70,7 @@ export default function PlayerControls({ localTime }) {
                 onChange={handleSeekChange}
                 onMouseUp={handleSeekEnd}
                 onTouchEnd={handleSeekEnd}
-                disabled={!canControl || !playback?.videoId}
+                disabled={!playback?.videoId}
                 className="flex-1 accent-brand disabled:opacity-40"
             />
 
@@ -77,7 +80,7 @@ export default function PlayerControls({ localTime }) {
 
             {!canControl && (
                 <span className="text-xs text-text-muted whitespace-nowrap">
-                    Host only
+                    Request mode
                 </span>
             )}
         </div>

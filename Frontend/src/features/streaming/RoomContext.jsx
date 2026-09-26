@@ -11,6 +11,7 @@ export function RoomContextProvider({ roomId, children }) {
     const playerRef = useRef(null);
     const [connected, setConnected] = useState(false);
     const [participants, setParticipants] = useState([]);
+    const [chat, setChat] = useState([]);
     const [playback, setPlayback] = useState({
         videoId: null,
         playing: false,
@@ -36,13 +37,8 @@ export function RoomContextProvider({ roomId, children }) {
         socket.on('disconnect', () => setConnected(false));
 
         socket.on('sync_state', (data) => {
-            console.log('[RoomContext] sync_state received:', {
-                currentTime: data.state?.currentTime,
-                playing: data.state?.playing,
-                videoId: data.state?.videoId,
-                hasYou: !!data.you,
-            });
             if (data.participants) setParticipants(data.participants);
+            if (data.chat) setChat(data.chat);
             if (data.state) setPlayback(data.state);
             if (data.you) setMyRole(data.you.role);
         });
@@ -63,6 +59,20 @@ export function RoomContextProvider({ roomId, children }) {
             }
         });
 
+        socket.on('chat_message', (message) => {
+            setChat((prev) => [...prev, message]);
+        });
+
+        socket.on('request_created', (request) => {
+            setChat((prev) => [...prev, request]);
+        });
+
+        socket.on('request_resolved', (resolved) => {
+            setChat((prev) =>
+                prev.map((m) => (m.id === resolved.id ? resolved : m))
+            );
+        });
+
         socket.on('error', (msg) => setError(msg));
         socket.on('connect_error', (err) =>
             setError(`Connection failed: ${err.message}`)
@@ -74,14 +84,28 @@ export function RoomContextProvider({ roomId, children }) {
         };
     }, [roomId, user]);
 
+    function sendMessage(text) {
+        socketRef.current?.emit('send_message', { text });
+    }
+
+    function requestAction(action, payload = {}) {
+        socketRef.current?.emit('request_action', { action, payload });
+    }
+
+    function resolveRequest(requestId, decision) {
+        socketRef.current?.emit('resolve_request', { requestId, decision });
+    }
+
     function play() {
         const time = playerRef.current?.getCurrentTime?.() || 0;
         socketRef.current?.emit('play', { time });
     }
+
     function pause() {
         const time = playerRef.current?.getCurrentTime?.() || 0;
         socketRef.current?.emit('pause', { time });
     }
+
     function seek(time) {
         socketRef.current?.emit('seek', { time });
     }
@@ -102,7 +126,27 @@ export function RoomContextProvider({ roomId, children }) {
         socketRef.current?.emit('transfer_host', { targetId });
     }
 
-    const canControl = myRole === 'host' || myRole === 'moderator';
+    const canControl = myRole === 'host' || myRole === 'moderator'
+
+    function requestPlay() {
+        if (canControl) play();
+        else requestAction('play', {});
+    }
+
+    function requestPause() {
+        if (canControl) pause();
+        else requestAction('pause', {});
+    }
+
+    function requestSeek(time) {
+        if (canControl) seek(time);
+        else requestAction('seek', { time });
+    }
+
+    function requestChangeVideo(videoId) {
+        if (canControl) changeVideo(videoId);
+        else requestAction('change_video', { videoId });
+    }
     const isHost = myRole === 'host';
 
     return (
@@ -111,12 +155,16 @@ export function RoomContextProvider({ roomId, children }) {
                 roomId,
                 connected,
                 participants,
+                chat,
                 playback,
                 myRole,
                 error,
                 canControl,
                 isHost,
                 playerRef,
+                sendMessage,
+                requestAction,
+                resolveRequest,
                 play,
                 pause,
                 seek,
@@ -124,6 +172,10 @@ export function RoomContextProvider({ roomId, children }) {
                 assignRole,
                 removeParticipant,
                 transferHost,
+                requestPlay,          // ← ADD
+                requestPause,         // ← ADD
+                requestSeek,          // ← ADD
+                requestChangeVideo,
             }}
         >
             {children}

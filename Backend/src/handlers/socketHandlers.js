@@ -12,7 +12,6 @@ export function registerSocketHandlers(io, socket) {
                 return socket.emit(SOCKET_EVENTS.ERROR, 'Room not found');
             }
 
-            // If already in the room (rejoin), remove first
             if (socket.roomId && roomManager.get(socket.roomId)) {
                 const oldRoom = roomManager.get(socket.roomId);
                 oldRoom.removeParticipant(socket.userId);
@@ -29,13 +28,11 @@ export function registerSocketHandlers(io, socket) {
             socket.roomId = roomId;
             socket.join(roomId);
 
-            // Send the full room state to the joiner
             socket.emit(SOCKET_EVENTS.SYNC_STATE, {
                 ...room.snapshot(),
                 you: { id: socket.userId, role: room.getParticipant(socket.userId).role },
             });
 
-            // Broadcast to everyone else that someone joined
             socket.to(roomId).emit(SOCKET_EVENTS.USER_JOINED, {
                 userId: socket.userId,
                 username,
@@ -57,7 +54,7 @@ export function registerSocketHandlers(io, socket) {
         handleLeave(io, socket);
     });
 
-    // ---- playback: play / pause / seek / change_video ----
+    // ---- playback ----
     ['play', 'pause', 'seek', 'change_video'].forEach((action) => {
         socket.on(action, (payload = {}) => {
             handlePlayback(io, socket, action, payload);
@@ -90,7 +87,6 @@ export function registerSocketHandlers(io, socket) {
 
             const removed = room.removeParticipantBy(socket.userId, targetId);
 
-            // If the removed user's socket is still connected, boot them
             if (removed.socketId) {
                 const targetSocket = io.sockets.sockets.get(removed.socketId);
                 if (targetSocket) {
@@ -123,6 +119,59 @@ export function registerSocketHandlers(io, socket) {
                 newHostId: targetId,
                 participants: room.participantsList(),
             });
+        } catch (err) {
+            socket.emit(SOCKET_EVENTS.ERROR, err.message);
+        }
+    });
+
+    // ---- send_message ----
+    socket.on(SOCKET_EVENTS.SEND_MESSAGE, ({ text }) => {
+        try {
+            const room = getRoomFor(socket);
+            if (!room) return;
+
+            const message = room.sendMessage(socket.userId, text);
+            if (!message) return;
+
+            io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, message);
+        } catch (err) {
+            socket.emit(SOCKET_EVENTS.ERROR, err.message);
+        }
+    });
+
+    // ---- request_action ----
+    socket.on(SOCKET_EVENTS.REQUEST_ACTION, ({ action, payload }) => {
+        try {
+            const room = getRoomFor(socket);
+            if (!room) return;
+
+            const request = room.requestAction(socket.userId, action, payload);
+
+            io.to(room.id).emit(SOCKET_EVENTS.REQUEST_CREATED, request);
+        } catch (err) {
+            socket.emit(SOCKET_EVENTS.ERROR, err.message);
+        }
+    });
+
+    // ---- resolve_request ----
+    socket.on(SOCKET_EVENTS.RESOLVE_REQUEST, ({ requestId, decision }) => {
+        try {
+            const room = getRoomFor(socket);
+            if (!room) return;
+
+            const request = room.resolveRequest(socket.userId, requestId, decision);
+
+            io.to(room.id).emit(SOCKET_EVENTS.REQUEST_RESOLVED, request);
+
+            if (request.status === 'approved') {
+                room.applyAction(socket.userId, request.action, request.payload);
+
+                const snap = room.snapshot();
+                io.to(room.id).emit(SOCKET_EVENTS.SYNC_STATE, {
+                    roomId: room.id,
+                    state: snap.state,
+                });
+            }
         } catch (err) {
             socket.emit(SOCKET_EVENTS.ERROR, err.message);
         }
@@ -160,6 +209,7 @@ function handlePlayback(io, socket, action, payload) {
         socket.emit(SOCKET_EVENTS.ERROR, err.message);
     }
 }
+
 function handleLeave(io, socket) {
     const roomId = socket.roomId;
     if (!roomId) return;
@@ -181,6 +231,5 @@ function handleLeave(io, socket) {
         participants: room.participantsList(),
     });
 
-    // If the room is now empty, delete it
     roomManager.deleteIfEmpty(roomId);
 }
