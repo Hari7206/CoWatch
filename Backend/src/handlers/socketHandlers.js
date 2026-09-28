@@ -1,10 +1,7 @@
-// Backend/src/handlers/socketHandlers.js
-
 import roomManager from '../domain/roomManagerInstance.js';
 import { SOCKET_EVENTS, ROLES } from '../constants.js';
 
 export function registerSocketHandlers(io, socket) {
-    // ---- join_room ----
     socket.on(SOCKET_EVENTS.JOIN_ROOM, ({ roomId, username }) => {
         try {
             const room = roomManager.get(roomId);
@@ -44,24 +41,20 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 
-    // ---- leave_room ----
     socket.on(SOCKET_EVENTS.LEAVE_ROOM, () => {
         handleLeave(io, socket);
     });
 
-    // ---- disconnect ----
     socket.on('disconnect', () => {
         handleLeave(io, socket);
     });
 
-    // ---- playback ----
     ['play', 'pause', 'seek', 'change_video'].forEach((action) => {
         socket.on(action, (payload = {}) => {
             handlePlayback(io, socket, action, payload);
         });
     });
 
-    // ---- assign_role ----
     socket.on(SOCKET_EVENTS.ASSIGN_ROLE, ({ targetId, role }) => {
         try {
             const room = getRoomFor(socket);
@@ -79,7 +72,6 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 
-    // ---- remove_participant ----
     socket.on(SOCKET_EVENTS.REMOVE_PARTICIPANT, ({ targetId }) => {
         try {
             const room = getRoomFor(socket);
@@ -107,7 +99,6 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 
-    // ---- transfer_host ----
     socket.on(SOCKET_EVENTS.TRANSFER_HOST, ({ targetId }) => {
         try {
             const room = getRoomFor(socket);
@@ -124,7 +115,6 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 
-    // ---- send_message ----
     socket.on(SOCKET_EVENTS.SEND_MESSAGE, ({ text }) => {
         try {
             const room = getRoomFor(socket);
@@ -139,7 +129,6 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 
-    // ---- request_action ----
     socket.on(SOCKET_EVENTS.REQUEST_ACTION, ({ action, payload }) => {
         try {
             const room = getRoomFor(socket);
@@ -153,7 +142,6 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 
-    // ---- resolve_request ----
     socket.on(SOCKET_EVENTS.RESOLVE_REQUEST, ({ requestId, decision }) => {
         try {
             const room = getRoomFor(socket);
@@ -177,8 +165,6 @@ export function registerSocketHandlers(io, socket) {
         }
     });
 }
-
-// ---- helpers ----
 
 function getRoomFor(socket) {
     if (!socket.roomId) {
